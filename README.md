@@ -75,7 +75,7 @@ make
 ```
 
 > **⚠️ Runtime:** The full analysis takes approximately 3–4 hours (100 repetitions).
-> Set `test_mode <- TRUE` at the top of `code/analysis.R` to run a 2-rep test in ~5 minutes.
+> To run a quick 2-rep test (~5 minutes), uncomment `n_rep <- 2` and comment out `n_rep <- 100` near the top of `code/analysis.R`.
 > The final output table is committed to `output/tables/` so `paper.pdf` can be
 > compiled without rerunning the analysis.
 

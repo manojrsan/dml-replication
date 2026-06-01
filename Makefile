@@ -22,7 +22,7 @@ output/tables/main_result.tex: temp/clean_data.rds code/analysis.R
 # ------------------------------------------------------------------
 paper/paper.pdf: paper/paper.tex paper/references.bib \
                  output/tables/main_result.tex
-	cd paper && pdflatex paper.tex && pdflatex paper.tex
+	cd paper && pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex
 
 # ------------------------------------------------------------------
 # Clean: remove all regenerable files
