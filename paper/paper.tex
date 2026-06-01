@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{natbib}
 \usepackage{setspace}
+\usepackage{hyperref}
 
 \onehalfspacing
 
@@ -16,7 +17,9 @@
 \begin{document}
 	
 	\maketitle
-	
+	\begin{center}
+		\small GitHub Repository: \href{https://github.com/manojrsan/dml-replication/tree/main}{https://github.com/manojrsan/dml-replication/tree/main}
+	\end{center}
 	\section{The Original Paper}
 	
 	This study replicates a specific result from \textit{Double/Debiased Machine Learning for
@@ -36,16 +39,17 @@
 	
 	\section{The Result of Interest}
 	
-	This replication targets the 5-fold cross-fitting row of Panel B (Partially Linear
-	Regression model) of Table 2, which reports the estimated Average Treatment Effect (ATE)
-	of 401(k) eligibility (\texttt{e401}) on net total financial assets (\texttt{net\_tfa})
-	across six machine learning methods and an ensemble. Panel~A of Table~\ref{tab:main}
-	reproduces the paper's targets exactly.
+	This replication targets the 5-fold cross-fitting row of Panel B, the partially linear
+	regression model, from Table 2 of Chernozhukov et al.\ (2018). This result reports the
+	estimated Average Treatment Effect (ATE) of 401(k) eligibility (\texttt{e401}) on net
+	total financial assets (\texttt{net\_tfa}) across several machine learning methods used
+	for nuisance estimation. The first portion of Table~\ref{tab:main} reports the original
+	paper's target values, while the second portion reports my replication estimates.
 	
-	This particular result is the most directly interpretable in the paper: it translates
-	the DML procedure into a concrete, policy-relevant estimate using a well-known dataset,
-	and directly demonstrates that the choice of nuisance learner has only modest effects on
-	the structural parameter once debiasing is applied correctly.
+	This particular result is worth reproducing because it is one of the paper's clearest
+	empirical demonstrations of the DML procedure. It translates the method into a concrete,
+	policy-relevant estimate using a well-known dataset and shows how the structural estimate
+	changes, or remains stable, when different nuisance learners are used.
 	
 	\section{Data and Methods}
 	
@@ -54,12 +58,12 @@
 	The data come from the 1991 Survey of Income and Program Participation (SIPP), following
 	the sample construction of \citet{abadie2003}. The raw file \texttt{input/sipp1991.dta}
 	is loaded by \texttt{code/preprocess.R}, which selects the eleven analysis variables and
-	drops incomplete cases, producing a balanced sample of household-level observations saved
-	to \texttt{temp/clean\_data.rds}. The outcome variable is net total financial assets
+	drops incomplete cases before saving the analysis-ready dataset to
+	\texttt{temp/clean\_data.rds}. The outcome variable is net total financial assets
 	(\texttt{net\_tfa}) and the treatment indicator is whether the household's employer offers
-	a 401(k) plan (\texttt{e401}). Nine covariates are included: age, income, education,
-	family size, marital status, two-earner status, defined benefit pension status, IRA
-	participation, and home ownership.
+	a 401(k) plan (\texttt{e401}). The covariates are age, income, education, family size,
+	marital status, two-earner status, defined benefit pension status, IRA participation, and
+	home ownership.
 	
 	\subsection*{Methods}
 	
@@ -70,61 +74,59 @@
 	\end{align}
 	where $Y$ is net financial assets, $D$ is 401(k) eligibility, $X$ is the vector of
 	controls, and $\theta_0$ is the ATE of interest. The nuisance functions $g_0$ and $m_0$
-	are estimated via cross-fitting with $K=5$ folds. Six learners are used for nuisance
-	estimation: Lasso (with a rich polynomial and interaction feature matrix matching the
-	original paper), Regression Tree, Random Forest, Boosting, Neural Network, and an
-	Ensemble average. The DML2 score function is used throughout. Results are aggregated
-	across 100 random sample splits, reporting the median ATE and two standard error
-	measures.
+	are estimated using cross-fitting. The analysis uses Lasso, Regression Tree, Random
+	Forest, Boosting, Neural Network, and an Ensemble average for nuisance estimation. For
+	Lasso, I use a rich polynomial and interaction feature matrix designed to follow the
+	original replication code as closely as possible. I use the PLR orthogonal score with the
+	DML2 cross-fitting procedure throughout. Results are aggregated across repeated random
+	sample splits, reporting the median ATE and two standard error measures.
 	
 	\section{Replication Results}
 	
-	Table~\ref{tab:main} presents the replicated results alongside the paper's targets.
-	In plain terms, the ATEs indicate that 401(k) eligibility increases net financial assets
-	by roughly \$8,000--\$9,700 depending on the learner used for nuisance estimation, a
-	large and economically meaningful effect relative to the sample mean of \$18,052. The
-	stability of this estimate across very different machine learning methods, from a
-	penalised linear model to a neural network, directly illustrates the DML estimator's
-	central claim of robustness to nuisance function specification.
+	Table~\ref{tab:main} presents the replicated results alongside the paper's targets. In
+	plain terms, the estimates imply that 401(k) eligibility has a positive and economically
+	meaningful effect on net financial assets. The fact that the estimated effect is broadly
+	stable across several different machine learning methods illustrates the main empirical
+	point of the DML approach: once the nuisance functions are estimated flexibly and the
+	orthogonal score is used, the final structural estimate is less dependent on any single
+	nuisance specification.
 	
 	\input{../output/tables/main_result.tex}
 	
-	The replication closely matches the paper for tree-based and ensemble methods: Random
-	Forest (9,269 vs.\ 9,247), Boosting (8,983 vs.\ 9,110), Ensemble (9,338 vs.\ 9,166),
-	and Best (9,667 vs.\ 9,215) all fall within a few hundred units of their targets, well
-	within one standard error. The Neural Network ATE of 9,213 modestly exceeds the paper's
-	9,038 by approximately 175 units, likely due to random variation in weight initialisation
-	across splits. The Lasso ATE of 9,676 exceeds the paper's 8,187 by approximately 1,500,
-	likely reflecting the reduced polynomial degree used here (\texttt{poly(inc, 4)} versus
-	\texttt{poly(inc, 8)} in the original). The two SE rows capture different uncertainty
-	sources: the bracket row $[\cdot]$ adds split-to-split variability on top of the
-	within-split SE reported in the parenthesis row $(\cdot)$; both are closely matched
-	across all methods, confirming the score function and aggregation are correctly
-	implemented.
+	The replication is closest for the tree-based and ensemble methods, while the largest
+	discrepancy appears for Lasso. This pattern is consistent with the fact that the Lasso
+	specification is especially sensitive to the exact polynomial and interaction feature
+	construction used in the original code. The neural network estimate is also somewhat
+	sensitive to random initialization and repeated sample splitting. Overall, however, the
+	replication follows the same general pattern as the original table: the ATE is positive
+	for every learner, the estimates are of similar economic magnitude, and the two standard
+	error rows move closely with the corresponding rows in the published result. This suggests
+	that the score function, cross-fitting, and aggregation steps are implemented consistently
+	with the original replication code.
 	
 	\section{What I Learned}
 	
-	The most straightforward aspect of the replication was the DML estimator itself. Once
-	the cross-fitting loop and score function are correctly coded, the structural estimates
-	fall out cleanly and the aggregation across 100 splits is mechanical. The framework's
-	robustness to learner choice, its central theoretical claim, is also directly visible
-	in the results: once nuisance functions are estimated reasonably well, $\theta_0$ is
-	stable across very different ML methods, confirming the paper's key insight empirically.
+	The most straightforward aspect of the replication was the DML estimator itself. Once the
+	cross-fitting loop and orthogonal score are correctly coded, the structural estimates can
+	be computed in a systematic way and the aggregation across repeated splits is mechanical.
+	The framework's robustness to learner choice, its central theoretical claim, is also
+	directly visible in the results: once nuisance functions are estimated reasonably well,
+	$\theta_0$ is stable across very different machine learning methods.
 	
 	The hardest part was matching the nuisance function specification. The paper's original
 	\texttt{R} code contains a compact one-line formula (\texttt{xl}) for the Lasso feature
-	matrix that expands to hundreds of columns of polynomials and pairwise interactions,
-	but this detail does not appear in the paper text at all; it only appears in the code.
-	Without reading \texttt{401K.R} carefully, it would be easy to run Lasso on the raw
-	nine covariates and obtain a badly biased estimate, incorrectly concluding the
-	replication failed. Computational cost was a secondary challenge: with over 5,000 total
-	ML fits, runtime exceeded seven hours until Forest and GBM settings were tuned. Exact
-	seed matching with the original is also not possible since the paper uses parallel
-	execution with per-worker seeds. Both issues point to the same lesson: code-level
-	documentation matters as much as methodological description. If I were the original
-	author, I would explicitly state the feature construction for penalised learners and
-	the parallelisation setup in a replication appendix.
-\newpage
+	matrix that expands to a large set of polynomial terms and interactions, but this detail
+	is much more visible in the code than in the paper text. Without reading \texttt{401K.R}
+	carefully, it would be easy to run Lasso on the raw covariates and obtain a noticeably
+	different estimate, incorrectly concluding that the replication failed. Computational cost
+	was a secondary challenge because repeated cross-fitting requires many machine learning
+	fits. Exact seed matching with the original is also difficult because the original code
+	uses parallel execution with per-worker seeds. These issues point to the same lesson:
+	code-level documentation matters as much as methodological description. If I were the
+	original author, I would explicitly state the feature construction for penalised learners
+	and the parallelisation setup in a replication appendix.
+	
+	\newpage
 	\bibliographystyle{apalike}
 	\bibliography{references}
 	
