@@ -68,9 +68,9 @@ install.packages(c("haven","DoubleML","data.table","glmnet","rpart",
 ## Reproducing the Paper
 
 ```bash
-git clone https://github.com/manojrsan/dml-replication-chernozhukov.git
-cd dml-replication-chernozhukov
-# (download sipp1991.dta into input/ if not using fetch_401k)
+git clone https://github.com/manojrsan/dml-replication.git
+cd dml-replication
+# download sipp1991.dta into input/ (see Data section above)
 make
 ```
 
