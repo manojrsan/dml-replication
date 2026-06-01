@@ -1,0 +1,4 @@
+"","Lasso","Reg. Tree","Forest","Boosting","Neural Net","Ensemble","Best"
+"ATE (5-fold)",9676,9026,9269,8983,9213,9338,9667
+"[Adjusted SE]",1365,1394,1328,1331,1649,1330,1366
+"(Median SE)",1347,1356,1308,1325,1495,1311,1345

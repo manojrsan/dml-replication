@@ -1,0 +1,2 @@
+"Method","Model","Cross_fitting","Outcome","Treatment","Estimate","Std_Error","t_stat","p_value"
+"Lasso","Partially Linear Regression","5-fold","net_tfa","e401",5800.68508044515,1536.24017942958,3.77589725754927,0.000159432703118569
