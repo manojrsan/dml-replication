@@ -391,7 +391,7 @@ write_latex_table <- function(result, outpath) {
 # Call it — adjust path to match your directory structure
 write_latex_table(
   result  = result,   # the 3-row matrix produced earlier in the script
-  outpath = "~/GSE 552/DML Replication/output/tables/main_result.tex"
+  outpath = "output/tables/main_result.tex"
 )
 
 # Console summary for the grader

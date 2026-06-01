@@ -45,23 +45,21 @@ originally used in Abadie (2003). The file `sipp1991.dta` is available at:
 
 https://github.com/VC2015/DMLonGitHub/blob/master/sipp1991.dta
 
-Download it and place it in `input/sipp1991.dta` before running.
-
-Alternatively, the analysis script can load it directly via the `DoubleML` R
-package (`fetch_401k()`), in which case no manual download is needed.
+Download it and place it in `input/sipp1991.dta` before running. The
+preprocessing script (`code/preprocess.R`) reads this file directly.
 
 ---
 
 ## Prerequisites
 
-- **R** (≥ 4.0) with packages: `DoubleML`, `data.table`, `glmnet`, `rpart`,
-  `randomForest`, `gbm`, `nnet`, `matrixStats`
+- **R** (≥ 4.0) with packages: `haven`, `DoubleML`, `data.table`, `glmnet`,
+  `rpart`, `randomForest`, `gbm`, `nnet`, `matrixStats`
 - **LaTeX** (TeX Live or MacTeX) with `pdflatex`
 - **Make**
 
 Install R packages:
 ```r
-install.packages(c("DoubleML","data.table","glmnet","rpart",
+install.packages(c("haven","DoubleML","data.table","glmnet","rpart",
                    "randomForest","gbm","nnet","matrixStats"))
 ```
 
