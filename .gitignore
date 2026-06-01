@@ -1,0 +1,17 @@
+temp/
+__pycache__/
+*.pyc
+.Rhistory
+.RData
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+.DS_Store
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.synctex.gz
