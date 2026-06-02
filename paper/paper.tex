@@ -22,109 +22,54 @@
 	\end{center}
 	\section{The Original Paper}
 	
-	This study replicates a specific result from \textit{Double/Debiased Machine Learning for
-		Treatment and Structural Parameters} by Victor Chernozhukov, Denis Chetverikov, Mert
-	Demirer, Esther Duflo, Christian Hansen, Whitney Newey, and James Robins, published in
-	\textit{The Econometrics Journal} in 2018 \citep{chernozhukov2018}.
+	This study replicates a specific result from \textit{Double/Debiased Machine Learning for Treatment and Structural Parameters} by Victor Chernozhukov, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen, Whitney Newey, and James Robins, published in \textit{The Econometrics Journal} in 2018 \cite{chernozhukov2018}. The paper develops and demonstrates a framework for estimating causal and structural parameters when researchers want to use flexible machine learning methods to control for many covariates.
 	
-	The paper addresses a fundamental problem in causal inference: when the number of
-	controls is large relative to the sample size, na\"ively plugging machine learning
-	estimates of nuisance functions into a structural equation produces estimators that are
-	biased at the $\sqrt{N}$ rate due to regularization bias and overfitting. The authors
-	show that this bias can be removed by combining two ingredients: (1)
-	\textit{Neyman-orthogonal} moment conditions, which have reduced sensitivity to errors
-	in nuisance estimation, and (2) \textit{cross-fitting}, an efficient form of
-	sample-splitting that prevents overfitting from contaminating the structural estimate.
-	The resulting procedure is called Double/Debiased Machine Learning (DML).
+	The central problem addressed by the paper is that standard machine learning methods are designed primarily for prediction, not causal inference. If machine learning predictions are inserted directly into a causal model, regularization bias and overfitting can contaminate the final treatment-effect estimate. Chernozhukov et al. (2018) propose Double/Debiased Machine Learning (DML) as a solution. The method combines Neyman-orthogonal moment conditions, which make the target parameter less sensitive to small errors in nuisance-function estimation, with cross-fitting, which separates the observations used to train the nuisance models from the observations used to estimate the structural parameter. Together, these tools allow researchers to use flexible prediction methods while still obtaining valid inference for the causal parameter of interest.
 	
 	\section{The Result of Interest}
 	
-	This replication targets the 5-fold cross-fitting row of Panel B, the partially linear
-	regression model, from Table 2 of Chernozhukov et al.\ (2018). This result reports the
-	estimated Average Treatment Effect (ATE) of 401(k) eligibility (\texttt{e401}) on net
-	total financial assets (\texttt{net\_tfa}) across several machine learning methods used
-	for nuisance estimation. The first portion of Table~\ref{tab:main} reports the original
-	paper's target values, while the second portion reports my replication estimates.
+	This replication targets the 5-fold cross-fitting results in Panel B of Table 2 from \cite{chernozhukov2018}, which applies the partially linear regression model to the 401(k) eligibility example. The object of interest is the Average Treatment Effect (ATE) of 401(k) eligibility, \texttt{e401}, on household net total financial assets, \texttt{net\_tfa}. In the DML framework, this coefficient is estimated after flexibly partialling out the relationship between the covariates and both the outcome and treatment. The first portion of Table~\ref{tab:main} reports the original paper's target values, while the second portion reports my replication estimates.
 	
-	This particular result is worth reproducing because it is one of the paper's clearest
-	empirical demonstrations of the DML procedure. It translates the method into a concrete,
-	policy-relevant estimate using a well-known dataset and shows how the structural estimate
-	changes, or remains stable, when different nuisance learners are used.
+	I chose this result because it is a compact but useful test of the main idea of the paper. The table does not rely on one preferred machine learning method; instead, it compares estimates across Lasso, trees, forests, boosting, neural networks, an ensemble learner, and the best-performing learner. That makes it possible to see whether the final treatment effect is driven by one particular nuisance model or whether the orthogonalized DML procedure produces a stable estimate across different first-stage methods. In that sense, this result is not only an empirical estimate of the effect of 401(k) eligibility, but also a practical demonstration of the paper's broader argument about using machine learning for causal inference.
+	
 	
 	\section{Data and Methods}
 	
 	\subsection*{Data}
 	
-	The data come from the 1991 Survey of Income and Program Participation (SIPP), following
-	the sample construction of \citet{abadie2003}. The raw file \texttt{input/sipp1991.dta}
-	is loaded by \texttt{code/preprocess.R}, which selects the eleven analysis variables and
-	drops incomplete cases before saving the analysis-ready dataset to
-	\texttt{temp/clean\_data.rds}. The outcome variable is net total financial assets
-	(\texttt{net\_tfa}) and the treatment indicator is whether the household's employer offers
-	a 401(k) plan (\texttt{e401}). The covariates are age, income, education, family size,
-	marital status, two-earner status, defined benefit pension status, IRA participation, and
-	home ownership.
+	The data come from the 1991 Survey of Income and Program Participation (SIPP), following the 401(k) eligibility application used by \cite{abadie2003} and \cite{chernozhukov2018}. The raw data file, \texttt{input/sipp1991.dta}, is never modified directly. Instead, \texttt{code/preprocess.R} reads the raw file, keeps the variables needed for the replication, removes incomplete observations, and saves the analysis-ready dataset as \texttt{temp/clean\_data.rds}. This keeps the original data separate from the generated analysis file and makes the pipeline reproducible from a clean clone of the repository.
+	
+	The outcome variable is household net total financial assets, \texttt{net\_tfa}. The treatment variable is \texttt{e401}, an indicator for whether the household is eligible for a 401(k) plan through an employer. The controls are age, income, education, family size, marital status, two-earner status, defined benefit pension status, IRA participation, and home ownership. These covariates are used to adjust for observable differences between households that are and are not eligible for a 401(k).
 	
 	\subsection*{Methods}
 	
-	The partially linear regression (PLR) model is:
+	The replication estimates the partially linear regression (PLR) model:
 	\begin{align}
-		Y &= D\theta_0 + g_0(X) + U, \quad E[U \mid X, D] = 0, \\
-		D &= m_0(X) + V, \quad E[V \mid X] = 0,
+		Y &= D\theta_0 + g_0(X) + U, \qquad E[U \mid X, D] = 0, \\
+		D &= m_0(X) + V, \qquad E[V \mid X] = 0,
 	\end{align}
-	where $Y$ is net financial assets, $D$ is 401(k) eligibility, $X$ is the vector of
-	controls, and $\theta_0$ is the ATE of interest. The nuisance functions $g_0$ and $m_0$
-	are estimated using cross-fitting. The analysis uses Lasso, Regression Tree, Random
-	Forest, Boosting, Neural Network, and an Ensemble average for nuisance estimation. For
-	Lasso, I use a rich polynomial and interaction feature matrix designed to follow the
-	original replication code as closely as possible. I use the PLR orthogonal score with the
-	DML2 cross-fitting procedure throughout. Results are aggregated across repeated random
-	sample splits, reporting the median ATE and two standard error measures.
+	where $Y$ is net financial assets, $D$ is 401(k) eligibility, $X$ is the vector of controls, and $\theta_0$ is the average treatment effect of interest. The nuisance functions $g_0(X)$ and $m_0(X)$ capture the relationship between the controls and, respectively, the outcome and treatment. Rather than imposing a simple linear specification for these nuisance functions, the DML approach estimates them flexibly using machine learning.
+	
+	The analysis uses Lasso, Regression Tree, Random Forest, Boosting, Neural Network, and an Ensemble learner for nuisance estimation. For Lasso, I construct a richer polynomial and interaction feature matrix to follow the original replication code as closely as possible. I then use 5-fold cross-fitting with the PLR orthogonal score and the DML2 aggregation procedure. In each split, the nuisance functions are trained on one part of the data and evaluated on held-out observations, which helps prevent overfitting from directly entering the treatment-effect estimate. The final table reports results aggregated across repeated sample splits, using the median ATE and the corresponding standard error measures.
 	
 	\section{Replication Results}
 	
-	Table~\ref{tab:main} presents the replicated results alongside the paper's targets. In
-	plain terms, the estimates imply that 401(k) eligibility has a positive and economically
-	meaningful effect on net financial assets. The fact that the estimated effect is broadly
-	stable across several different machine learning methods illustrates the main empirical
-	point of the DML approach: once the nuisance functions are estimated flexibly and the
-	orthogonal score is used, the final structural estimate is less dependent on any single
-	nuisance specification.
+	Table~\ref{tab:main} reports the original 5-fold PLR estimates from \cite{chernozhukov2018} alongside my replication results. The table shows the estimated effect of 401(k) eligibility on net total financial assets using several different machine learning methods to estimate the nuisance functions. Across all learners, both the published results and my replication produce positive treatment-effect estimates. Substantively, this means that households eligible for a 401(k) plan are estimated to hold more net financial assets than comparable households that are not eligible, after adjusting flexibly for observed covariates.
 	
 	\input{../output/tables/main_result.tex}
 	
-	The replication is closest for the tree-based and ensemble methods, while the largest
-	discrepancy appears for Lasso. This pattern is consistent with the fact that the Lasso
-	specification is especially sensitive to the exact polynomial and interaction feature
-	construction used in the original code. The neural network estimate is also somewhat
-	sensitive to random initialization and repeated sample splitting. Overall, however, the
-	replication follows the same general pattern as the original table: the ATE is positive
-	for every learner, the estimates are of similar economic magnitude, and the two standard
-	error rows move closely with the corresponding rows in the published result. This suggests
-	that the score function, cross-fitting, and aggregation steps are implemented consistently
-	with the original replication code.
+	The replication captures the main empirical pattern of the original table. The estimates are not identical learner by learner, but they remain in the same broad range and lead to the same substantive conclusion. The closest matches occur for the tree-based and ensemble methods, while the largest discrepancy appears for the Lasso specification. This is not surprising because the Lasso result is especially sensitive to the exact construction of the polynomial and interaction feature matrix used in the original code. The neural network result is also naturally more sensitive to implementation details such as initialization, tuning choices, and repeated sample splitting.
+	
+	Overall, the replication supports the central point illustrated by this table: the DML estimate is not driven entirely by one particular first-stage learner. Even when the nuisance functions are estimated with quite different machine learning methods, the resulting treatment-effect estimates are positive and of similar economic magnitude. The remaining differences are best interpreted as implementation-level discrepancies rather than a failure to reproduce the paper's qualitative finding. In particular, matching the original table exactly requires not only the same data and DML score, but also the same feature construction, tuning rules, sample splits, and aggregation procedure.
 	
 	\section{What I Learned}
 	
-	The most straightforward aspect of the replication was the DML estimator itself. Once the
-	cross-fitting loop and orthogonal score are correctly coded, the structural estimates can
-	be computed in a systematic way and the aggregation across repeated splits is mechanical.
-	The framework's robustness to learner choice, its central theoretical claim, is also
-	directly visible in the results: once nuisance functions are estimated reasonably well,
-	$\theta_0$ is stable across very different machine learning methods.
+	The most straightforward part of the replication was understanding the final DML estimating equation. Once the nuisance functions are estimated on separate folds, the residualized outcome and residualized treatment can be combined in the PLR orthogonal score in a relatively mechanical way. This helped me understand why cross-fitting and orthogonalization are useful: the machine learning models are important, but they are not the final object of interest. Their role is to remove predictable variation from the outcome and treatment so that the remaining variation can be used to estimate the structural parameter more credibly.
 	
-	The hardest part was matching the nuisance function specification. The paper's original
-	\texttt{R} code contains a compact one-line formula (\texttt{xl}) for the Lasso feature
-	matrix that expands to a large set of polynomial terms and interactions, but this detail
-	is much more visible in the code than in the paper text. Without reading \texttt{401K.R}
-	carefully, it would be easy to run Lasso on the raw covariates and obtain a noticeably
-	different estimate, incorrectly concluding that the replication failed. Computational cost
-	was a secondary challenge because repeated cross-fitting requires many machine learning
-	fits. Exact seed matching with the original is also difficult because the original code
-	uses parallel execution with per-worker seeds. These issues point to the same lesson:
-	code-level documentation matters as much as methodological description. If I were the
-	original author, I would explicitly state the feature construction for penalised learners
-	and the parallelisation setup in a replication appendix.
+	The hardest part of the replication was not the final regression step, but matching the original nuisance-function construction closely enough. The paper explains the DML method clearly, but some replication-relevant details are easier to find in the original code than in the published text. The Lasso specification is the clearest example: using only the raw covariates would look reasonable from the paper description, but it misses the richer polynomial and interaction feature matrix used in the original replication code. This taught me that reproducibility depends not only on having the data and the estimator, but also on knowing exactly how the analysis variables and learner-specific inputs were constructed.
+	
+	This replication also changed how I think about empirical machine learning papers. Small implementation choices, such as feature construction, sample splitting, random seeds, and repeated cross-fitting, can matter for whether a table matches exactly. At the same time, the broader pattern of the estimates can still be informative even when every number is not identical. If I were preparing the original replication package, I would add a short replication appendix that spells out the learner-specific feature construction, seed structure, and aggregation rule. Those details would make it easier for another researcher to distinguish a true substantive discrepancy from a minor implementation difference.
+	
 	
 	\newpage
 	\bibliographystyle{apalike}
