@@ -24,7 +24,7 @@
 	
 	This study replicates a specific result from \textit{Double/Debiased Machine Learning for Treatment and Structural Parameters} by Victor Chernozhukov, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen, Whitney Newey, and James Robins, published in \textit{The Econometrics Journal} in 2018 \cite{chernozhukov2018}. The paper develops and demonstrates a framework for estimating causal and structural parameters when researchers want to use flexible machine learning methods to control for many covariates.
 	
-	The central problem addressed by the paper is that standard machine learning methods are designed primarily for prediction, not causal inference. If machine learning predictions are inserted directly into a causal model, regularization bias and overfitting can contaminate the final treatment-effect estimate. Chernozhukov et al. (2018) propose Double/Debiased Machine Learning (DML) as a solution. The method combines Neyman-orthogonal moment conditions, which make the target parameter less sensitive to small errors in nuisance-function estimation, with cross-fitting, which separates the observations used to train the nuisance models from the observations used to estimate the structural parameter. Together, these tools allow researchers to use flexible prediction methods while still obtaining valid inference for the causal parameter of interest.
+	The central problem addressed by the paper is that standard machine learning methods are designed primarily for prediction, not causal inference. If machine learning predictions are inserted directly into a causal model, regularization bias and overfitting can contaminate the final treatment-effect estimate. \cite{chernozhukov2018} propose Double/Debiased Machine Learning (DML) as a solution. The method combines Neyman-orthogonal moment conditions, which make the target parameter less sensitive to small errors in nuisance-function estimation, with cross-fitting, which separates the observations used to train the nuisance models from the observations used to estimate the structural parameter. Together, these tools allow researchers to use flexible prediction methods while still obtaining valid inference for the causal parameter of interest.
 	
 	\section{The Result of Interest}
 	
@@ -46,7 +46,7 @@
 	The replication estimates the partially linear regression (PLR) model:
 	\begin{align}
 		Y &= D\theta_0 + g_0(X) + U, \qquad E[U \mid X, D] = 0, \\
-		D &= m_0(X) + V, \qquad E[V \mid X] = 0,
+		D &= m_0(X) + V, \qquad\qquad  E[V \mid X] = 0,
 	\end{align}
 	where $Y$ is net financial assets, $D$ is 401(k) eligibility, $X$ is the vector of controls, and $\theta_0$ is the average treatment effect of interest. The nuisance functions $g_0(X)$ and $m_0(X)$ capture the relationship between the controls and, respectively, the outcome and treatment. Rather than imposing a simple linear specification for these nuisance functions, the DML approach estimates them flexibly using machine learning.
 	
